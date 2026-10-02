@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Jobwave — Job Board
 
-## Getting Started
+Squelette Next.js de site d'annonces emploi : offres publiées, candidatures en ligne, espace employeur et back-office admin. Thème **ambre**.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router), React 19, TypeScript strict
+- Tailwind CSS v4 + shadcn/ui (Base UI)
+- Prisma 7 + PostgreSQL (`@prisma/adapter-pg`)
+- Better Auth (email/password) — rôles `ADMIN` / `EMPLOYER` / `CANDIDATE`
+- TanStack Table (admin), React Hook Form + Zod, Resend optionnel
+
+## Fonctionnalités
+
+**Public**
+- Offres publiées : recherche plein-texte, filtres contrat / remote / catégorie, tri récentes
+- Fiche offre : description riche, bouton « Postuler » (formulaire : nom, email, téléphone, CV URL, message)
+- Annuaire entreprises + page entreprise (offres ouvertes)
+- Candidat sans compte : la candidature est rattachée à l'email ; en se créant un compte avec le même email, l'historique est repris
+
+**Candidat connecté** (`/mes-candidatures`)
+- Liste de ses candidatures avec statut (Nouvelle → Vue → Entretien → Acceptée/Refusée)
+
+**Employeur** (`/admin`)
+- Dashboard stats, CRUD de **ses** offres et entreprises, candidatures à **ses** offres, changement de statut
+- Ne voit pas les données des autres entreprises (filtrage `ownerId`/`company.ownerId`)
+
+**Admin**
+- Tout l'espace employeur en global + catégories, utilisateurs (changement de rôle), activité, paramètres
+
+## Démarrage
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env          # DATABASE_URL, BETTER_AUTH_SECRET…
+pnpm db:push && pnpm db:seed
+pnpm dev                      # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Comptes de démo (`password123`) : `admin@example.com` · `sophie@example.com` (employeur Nova+PixelForge) · `thomas@example.com` (employeur Datawave) · `lina@example.com` (candidate).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`pnpm dev` · `build` · `typecheck` · `lint` · `db:generate` · `db:push` · `db:seed` · `db:studio`
 
-## Learn More
+## Structure
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/(site)/        # public : /, /emplois, /emplois/[slug], /entreprises, /mes-candidatures
+app/(admin)/admin/ # back-office (employeur + admin)
+lib/actions/       # server actions : jobs, applications, companies, users
+lib/queries.ts     # lectures prisma
+prisma/            # schéma + seed
+```
